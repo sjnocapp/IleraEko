@@ -11,20 +11,20 @@
     'use strict';
 
     const selectors = [
-        "#actions > tbody > tr:nth-child(2) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(6) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(7) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(8) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(10) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(13) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(16) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(20) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(23) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(25) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(28) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(30) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(31) > td:nth-child(4) > div > input",
-        "#actions > tbody > tr:nth-child(33) > td:nth-child(4) > div > input"
+        "#actions > tbody > tr:nth-child(2) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(6) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(7) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(8) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(10) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(13) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(16) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(20) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(23) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(25) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(28) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(30) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(31) > td:nth-child(5) > div > input",
+        "#actions > tbody > tr:nth-child(33) > td:nth-child(5 ) > div > input"
     ];
 
     const fieldLabels = [
@@ -33,37 +33,30 @@
     ];
 
     let valuesList = [
-        ["SHERWOOD","OLATUNIDIN","ADENIYI","NIL","MRS","FEMALE","MARRIED","GENERAL HOSPITAL GBAGADA","1,HOSPITAL ROAD, GBAGADA","ONDO","KOSOFE","8137336277","OLATUNIDINADENIYI22@GMAIL.COM", "1988-06-22"],
-    ["SHERWOOD","OJEAH","HELEN","IFEANYI","MRS","FEMALE","MARRIED","GENERAL HOSPITAL GBAGADA","1, HOSPITAL ROAD, GBAGADA","DELTA","KOSOFE","9125825468","OJEAHHELEN08@GMAIL.COM", "1992-11-14"]
+        ["SHERWOOD", "OLATUNIDIN", "ADENIYI", "NIL", "MRS", "FEMALE", "MARRIED", "GENERAL HOSPITAL GBAGADA", "1,HOSPITAL ROAD, GBAGADA", "ONDO", "KOSOFE", "8137336277", "OLATUNIDINADENIYI22@GMAIL.COM", "1988-06-22"],
+        ["SHERWOOD", "OJEAH", "HELEN", "IFEANYI", "MRS", "FEMALE", "MARRIED", "GENERAL HOSPITAL GBAGADA", "1, HOSPITAL ROAD, GBAGADA", "DELTA", "KOSOFE", "9125825468", "OJEAHHELEN08@GMAIL.COM", "1992-11-14"]
     ];
 
     let valueSetIndex = parseInt(localStorage.getItem('selectedValueSetIndex')) || 0;
 
     async function simulateTyping(input, text) {
         input.focus();
-
-        // Properly clear existing value
         input.value = '';
         input.dispatchEvent(new InputEvent('input', { bubbles: true }));
         input.dispatchEvent(new Event('change', { bubbles: true }));
 
-        // Clear using selection + delete if possible
         input.setSelectionRange(0, input.value.length);
         document.execCommand('delete');
 
-        // Type each character slowly
         for (let char of text) {
             input.value += char;
-
             input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: char }));
             input.dispatchEvent(new KeyboardEvent('keypress', { bubbles: true, key: char }));
             input.dispatchEvent(new InputEvent('input', { bubbles: true }));
             input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: char }));
-
-            await new Promise(resolve => setTimeout(resolve, 10)); // adjust delay if needed
+            await new Promise(resolve => setTimeout(resolve, 10));
         }
 
-        // Re-assert final value to ensure accuracy
         input.value = text;
         input.dispatchEvent(new InputEvent('input', { bubbles: true }));
         input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -78,13 +71,12 @@
             if (input) {
                 inputs.push({ input, value: values[i] || "" });
                 await simulateTyping(input, values[i] || "");
-                await new Promise(resolve => setTimeout(resolve, 200)); // allow for DOM scripts to react
+                await new Promise(resolve => setTimeout(resolve, 200));
             } else {
                 console.warn(`⚠️ Could not find: ${selectors[i]}`);
             }
         }
 
-            // Re-assert values after site JS may interfere
         setTimeout(() => {
             for (let { input, value } of inputs) {
                 input.value = value;
@@ -92,7 +84,6 @@
                 input.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
-            // 🔁 Specifically protect the Email field from being reverted
             watchAndFixField(selectors[12], values[12]);
             watchAndFixField(selectors[13], values[13]);
         }, 400);
@@ -104,23 +95,17 @@
 
         const observer = new MutationObserver(() => {
             if (target.value !== expectedValue) {
-                console.warn("🔁 Email field changed — restoring original value.");
+                console.warn("🔁 Field changed — restoring value.");
                 target.value = expectedValue;
                 target.dispatchEvent(new InputEvent('input', { bubbles: true }));
                 target.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
 
-        observer.observe(target, {
-            attributes: true,
-            childList: false,
-            subtree: false
-        });
+        observer.observe(target, { attributes: true });
 
-    // Optional: stop observing after 5 seconds
         setTimeout(() => observer.disconnect(), 5000);
     }
-
 
     function renderPreview() {
         const previewContainer = document.getElementById('previewTable');
@@ -141,8 +126,7 @@
                     <td style="border: 1px solid #ccc; padding: 4px;">
                         <input data-index="${i}" value="${value}" style="width: 100%; ${emptyStyle}" />
                     </td>
-                </tr>
-            `;
+                </tr>`;
         }
         html += "</table>";
         previewContainer.innerHTML = html;
@@ -197,8 +181,7 @@
             <button id="openLSHSButton">Open LSHS Portal</button>
             <hr />
             <label for="customValueSet">Paste Custom Value Set (JSON format):</label>
-<textarea id="customValueSet" rows="6" cols="35" placeholder='[["Employer","Surname",...,"Email"], [...]] OR [{"Employer":"...",...}]'></textarea>
-
+            <textarea id="customValueSet" rows="6" cols="35" placeholder='[["Employer","Surname",...], [...]] OR [{"Employer":"...",...}]'></textarea>
             <button id="applyCustomValues">Apply Custom Values</button>
             <p id="feedback" style="color: green;"></p>
             <hr />
@@ -207,6 +190,7 @@
         `;
 
         document.body.appendChild(ui);
+        makeDraggable(ui); // ✅ Moved inside where ui is defined
 
         document.getElementById('valueSetSelect').addEventListener('change', (event) => {
             valueSetIndex = parseInt(event.target.value);
@@ -226,17 +210,14 @@
 
             try {
                 const parsed = JSON.parse(customText);
-
-                // Normalize input: if array of objects, convert to array of arrays
                 let processed;
 
                 if (Array.isArray(parsed)) {
                     if (typeof parsed[0] === "object" && !Array.isArray(parsed[0])) {
-                        // Convert array of objects to array of arrays using fieldLabels
                         processed = parsed.map(obj => fieldLabels.map(label => obj[label] || ""));
                     } else if (Array.isArray(parsed[0])) {
                         processed = parsed.map(set => {
-                            while (set.length < selectors.length) set.push(""); // pad if too short
+                            while (set.length < selectors.length) set.push("");
                             return set;
                         });
                     } else {
@@ -265,21 +246,12 @@
             }
         });
 
-
         document.getElementById('openLSHSButton').addEventListener('click', () => {
             window.open('https://platform.lshsportal.com:7878/Enrollee/Index', '_blank');
         });
 
-        // Keyboard navigation (← and → for prev/next)
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') nextEntry();
-            if (e.key === 'ArrowLeft') previousEntry();
-        });
-
         renderPreview();
     }
-
-    window.addEventListener('load', createUI);
 
     function makeDraggable(element) {
         let isDragging = false, offsetX = 0, offsetY = 0;
@@ -302,7 +274,5 @@
         });
     }
 
-    // After creating UI element
-    makeDraggable(ui);
-    
+    window.addEventListener('load', createUI);
 })();
